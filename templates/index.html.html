@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Travel Agent</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .card {
+            background: #eee;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>AI Travel Agent ✈️</h2>
+
+    <button onclick="selectPref('mountains')">Mountains</button>
+    <button onclick="selectPref('beach')">Beach</button>
+    <button onclick="selectPref('adventure')">Adventure</button>
+    <button onclick="selectPref('relaxation')">Relaxation</button>
+
+    <br><br>
+    <button onclick="sendData()">Get Suggestions</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+let preferences = [];
+
+function selectPref(p) {
+    preferences.push(p);
+    alert("Selected: " + preferences.join(", "));
+}
+
+function sendData() {
+    fetch("/recommend", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            preferences: preferences.join(", ")
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let output = document.getElementById("output");
+        output.innerHTML = "";
+
+        data.places.forEach(place => {
+            output.innerHTML += `
+                <div class="card">
+                    <h3>${place.name}</h3>
+                    <img src="${place.image}">
+                    <p>Price: ${place.price}</p>
+                    <p>Rating: ${place.rating}</p>
+                </div>
+            `;
+        });
+    });
+}
+</script>
+
+</body>
+</html>
