@@ -5,7 +5,7 @@ from openai import OpenAI
 app = Flask(__name__)
 
 # Load API key from environment
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("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"))
 
 # -----------------------------
 # HOME PAGE
