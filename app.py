@@ -1,52 +1,77 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
+import os
+from openai import OpenAI
 
 app = Flask(__name__)
 
+# Load API key from environment
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# -----------------------------
+# HOME PAGE
+# -----------------------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/recommend", methods=["POST"])
-def recommend():
+
+# -----------------------------
+# AI ITINERARY GENERATION
+# -----------------------------
+def generate_itinerary(destination, days, budget, interests):
+    prompt = f"""
+    Create a detailed {days}-day travel itinerary for {destination}.
+
+    Budget: {budget}
+    Interests: {interests}
+
+    Include:
+    - Day-wise plan
+    - Places to visit
+    - Food suggestions
+    - Estimated budget breakdown
+    - Travel tips
+
+    Make it clean and easy to read.
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return response.choices[0].message.content
+
+
+# -----------------------------
+# API ROUTE (Frontend calls this)
+# -----------------------------
+@app.route("/generate", methods=["POST"])
+def generate():
     data = request.json
-    user_input = data.get("preferences", "").lower()
 
-    places = []
+    destination = data.get("destination")
+    days = data.get("days")
+    budget = data.get("budget")
+    interests = data.get("interests")
 
-    if "mountains" in user_input:
-        places.append({
-            "name": "Manali",
-            "price": "₹8,000",
-            "rating": "4.6",
-            "image": "https://source.unsplash.com/400x300/?manali"
-        })
+    result = generate_itinerary(destination, days, budget, interests)
 
-    if "beach" in user_input:
-        places.append({
-            "name": "Goa",
-            "price": "₹10,000",
-            "rating": "4.5",
-            "image": "https://source.unsplash.com/400x300/?goa"
-        })
-
-    if "adventure" in user_input:
-        places.append({
-            "name": "Rishikesh",
-            "price": "₹6,000",
-            "rating": "4.7",
-            "image": "https://source.unsplash.com/400x300/?rishikesh"
-        })
-
-    if "relaxation" in user_input:
-        places.append({
-            "name": "Kerala",
-            "price": "₹12,000",
-            "rating": "4.8",
-            "image": "https://source.unsplash.com/400x300/?kerala"
-        })
-
-    return jsonify({"places": places})
+    return jsonify({"result": result})
 
 
+# -----------------------------
+# TEST ROUTE (optional)
+# -----------------------------
+@app.route("/test")
+def test():
+    return generate_itinerary("Manali", 2, "10000", "adventure, mountains")
+
+
+# -----------------------------
+# RUN APP
+# -----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
