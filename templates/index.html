@@ -1,96 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Travel Agent</title>
+    <title>AI Travel Planner</title>
     <style>
         body {
             font-family: Arial;
-            background: #f2f2f2;
+            background: #f5f5f5;
             text-align: center;
         }
-
         .container {
-            background: white;
             width: 400px;
             margin: 50px auto;
+            background: white;
             padding: 20px;
             border-radius: 10px;
         }
-
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px;
+        }
         button {
-            margin: 5px;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background: #4CAF50;
+            padding: 10px 20px;
+            background: green;
             color: white;
-            cursor: pointer;
+            border: none;
+            border-radius: 5px;
         }
-
-        .card {
+        pre {
+            text-align: left;
             background: #eee;
-            margin-top: 10px;
             padding: 10px;
-            border-radius: 8px;
-        }
-
-        img {
-            width: 100%;
-            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
-
 <body>
 
 <div class="container">
-    <h2>AI Travel Agent ✈️</h2>
+    <h2>AI Travel Planner ✈️</h2>
 
-    <button onclick="selectPref('mountains')">Mountains</button>
-    <button onclick="selectPref('beach')">Beach</button>
-    <button onclick="selectPref('adventure')">Adventure</button>
-    <button onclick="selectPref('relaxation')">Relaxation</button>
+    <input id="destination" placeholder="Destination (e.g. Manali)">
+    <input id="days" placeholder="Days (e.g. 3)">
+    <input id="budget" placeholder="Budget (e.g. 10000)">
+    <input id="interests" placeholder="Interests (mountains, food)">
 
-    <br><br>
-    <button onclick="sendData()">Get Suggestions</button>
+    <button onclick="generate()">Generate Plan</button>
 
-    <div id="output"></div>
+    <pre id="result"></pre>
 </div>
 
 <script>
-let preferences = [];
-
-function selectPref(p) {
-    preferences.push(p);
-    alert("Selected: " + preferences.join(", "));
-}
-
-function sendData() {
-    fetch("/recommend", {
+async function generate() {
+    const res = await fetch("/generate", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            preferences: preferences.join(", ")
+            destination: document.getElementById("destination").value,
+            days: document.getElementById("days").value,
+            budget: document.getElementById("budget").value,
+            interests: document.getElementById("interests").value
         })
-    })
-    .then(res => res.json())
-    .then(data => {
-        let output = document.getElementById("output");
-        output.innerHTML = "";
-
-        data.places.forEach(place => {
-            output.innerHTML += `
-                <div class="card">
-                    <h3>${place.name}</h3>
-                    <img src="${place.image}">
-                    <p>Price: ${place.price}</p>
-                    <p>Rating: ${place.rating}</p>
-                </div>
-            `;
-        });
     });
+
+    const data = await res.json();
+    document.getElementById("result").innerText = data.result;
 }
 </script>
 
