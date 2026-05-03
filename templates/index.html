@@ -5,69 +5,89 @@
     <style>
         body {
             font-family: Arial;
-            background: #f5f5f5;
+            background: #f2f2f2;
             text-align: center;
         }
+
         .container {
             width: 400px;
-            margin: 50px auto;
+            margin: auto;
             background: white;
             padding: 20px;
+            margin-top: 50px;
             border-radius: 10px;
         }
+
         input {
             width: 90%;
             padding: 10px;
             margin: 10px;
         }
+
         button {
             padding: 10px 20px;
             background: green;
             color: white;
             border: none;
             border-radius: 5px;
+            cursor: pointer;
         }
-        pre {
-            text-align: left;
-            background: #eee;
-            padding: 10px;
+
+        #result {
             margin-top: 20px;
+            text-align: left;
             white-space: pre-wrap;
+        }
+
+        .loading {
+            color: gray;
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
     <h2>AI Travel Planner ✈️</h2>
 
-    <input id="destination" placeholder="Destination (e.g. Manali)">
-    <input id="days" placeholder="Days (e.g. 3)">
-    <input id="budget" placeholder="Budget (e.g. 10000)">
-    <input id="interests" placeholder="Interests (mountains, food)">
+    <input type="text" id="destination" placeholder="Destination (e.g. Manali)">
+    <input type="number" id="days" placeholder="Days (e.g. 3)">
+    <input type="number" id="budget" placeholder="Budget (e.g. 10000)">
+    <input type="text" id="interests" placeholder="Interests (mountains, food)">
 
-    <button onclick="generate()">Generate Plan</button>
+    <button onclick="generatePlan()">Generate Plan</button>
 
-    <pre id="result"></pre>
+    <div id="result"></div>
 </div>
 
 <script>
-async function generate() {
-    const res = await fetch("/generate", {
+async function generatePlan() {
+    const destination = document.getElementById("destination").value;
+    const days = document.getElementById("days").value;
+    const budget = document.getElementById("budget").value;
+    const interests = document.getElementById("interests").value;
+
+    document.getElementById("result").innerHTML = "<p class='loading'>Generating your trip...</p>";
+
+    const response = await fetch("/generate", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            destination: document.getElementById("destination").value,
-            days: document.getElementById("days").value,
-            budget: document.getElementById("budget").value,
-            interests: document.getElementById("interests").value
+            destination: destination,
+            days: days,
+            budget: budget,
+            interests: interests
         })
     });
 
-    const data = await res.json();
-    document.getElementById("result").innerText = data.result;
+    const data = await response.json();
+
+    document.getElementById("result").innerHTML = `
+        <h3>Your Travel Plan:</h3>
+        <pre>${data.result}</pre>
+    `;
 }
 </script>
 
