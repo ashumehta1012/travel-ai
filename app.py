@@ -6,35 +6,35 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-# Load OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/generate", methods=["POST"])
-def generate():
+
+@app.route("/chat", methods=["POST"])
+def chat():
     try:
         data = request.get_json()
-
-        destination = data.get("destination")
-        days = data.get("days")
-        budget = data.get("budget")
-        interests = data.get("interests")
+        user_input = data.get("message")
 
         prompt = f"""
-        Create a detailed travel plan:
+        You are an AI Travel Expert.
 
-        Destination: {destination}
-        Days: {days}
-        Budget: {budget}
-        Interests: {interests}
+        Help the user with travel planning.
 
-        Include:
-        - Day-wise itinerary
-        - Budget tips
-        - Places to visit
+        Provide:
+        - Best destinations (if not specified)
+        - How to reach (flight/train/road)
+        - Budget breakdown
+        - Famous places to visit
+        - Local food
+        - Best time to visit
+        - Tips
+
+        User query:
+        {user_input}
         """
 
         response = client.chat.completions.create(
@@ -42,13 +42,12 @@ def generate():
             messages=[{"role": "user", "content": prompt}]
         )
 
-        result = response.choices[0].message.content
+        reply = response.choices[0].message.content
 
-        return jsonify({"result": result})
+        return jsonify({"reply": reply})
 
     except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({"result": f"Error: {str(e)}"})
+        return jsonify({"reply": f"Error: {str(e)}"})
 
 
 if __name__ == "__main__":
