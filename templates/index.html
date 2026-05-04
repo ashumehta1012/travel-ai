@@ -1,28 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Travel Planner</title>
+    <title>AI Travel Chatbot</title>
+
     <style>
-        body { font-family: Arial; text-align: center; background: #f2f2f2; }
-        .box { margin-top: 100px; }
-        input { padding: 10px; width: 250px; }
-        button { padding: 10px 20px; background: green; color: white; border: none; }
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+        }
+
+        .chat-container {
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            margin-top: 50px;
+            border-radius: 10px;
+        }
+
+        #chat-box {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user {
+            text-align: right;
+            color: blue;
+        }
+
+        .bot {
+            text-align: left;
+            color: green;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px;
+        }
     </style>
 </head>
 
 <body>
-<div class="box">
-    <h1>🌍 AI Travel Planner</h1>
 
-    <input id="destination" placeholder="Enter destination">
-    <br><br>
-    <button onclick="goToPlan()">Search</button>
+<div class="chat-container">
+    <h2>AI Travel Chatbot ✈️</h2>
+
+    <div id="chat-box"></div>
+
+    <input type="text" id="message" placeholder="Ask anything (e.g. plan trip to Goa)">
+    <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
-function goToPlan() {
-    const dest = document.getElementById("destination").value;
-    window.location.href = "/plan?destination=" + dest;
+async function sendMessage() {
+    const messageInput = document.getElementById("message");
+    const chatBox = document.getElementById("chat-box");
+
+    const message = messageInput.value;
+
+    chatBox.innerHTML += `<p class="user"><b>You:</b> ${message}</p>`;
+
+    messageInput.value = "";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+
+    chatBox.innerHTML += `<p class="bot"><b>AI:</b> ${data.reply}</p>`;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 </script>
 
